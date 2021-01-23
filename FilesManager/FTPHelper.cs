@@ -27,9 +27,9 @@ namespace FilesManager
         /// <param name="path"></param>
         private void Connect(string path)//连接ftp
         {
-            string parsePath = path.StartsWith("ftp://") ? path : "ftp://" + path;
+            //string parsePath = path.StartsWith("ftp://") ? path : "ftp://" + path;
             // 根据uri创建FtpWebRequest对象
-            reqFTP = (FtpWebRequest)FtpWebRequest.Create(new Uri(parsePath));
+            reqFTP = (FtpWebRequest)FtpWebRequest.Create(new Uri(path));
             // 指定数据传输类型
             reqFTP.UseBinary = true;
             // ftp用户名和密码
@@ -101,7 +101,7 @@ namespace FilesManager
         /// <returns></returns>
         public string[] GetFileList(string path)
         {
-            return GetFileList("ftp://" + ftpServerIP + "/" + path, WebRequestMethods.Ftp.ListDirectory);
+            return GetFileList(path, WebRequestMethods.Ftp.ListDirectory);
         }
         /// <summary>
         /// 默认URl文件列表
@@ -109,7 +109,7 @@ namespace FilesManager
         /// <returns></returns>
         public string[] GetFileList()
         {
-            return GetFileList("ftp://" + ftpServerIP + "/", WebRequestMethods.Ftp.ListDirectory);
+            return GetFileList(ftpServerIP, WebRequestMethods.Ftp.ListDirectory);
         }
         #endregion
         #region 上传文件
@@ -120,13 +120,11 @@ namespace FilesManager
         /// <param name="path">上传的路径</param>
         /// <param name="errorinfo">返回信息</param>
         /// <returns></returns>
-        public bool Upload(string filename, string path, ref string errorinfo)
+        public bool Upload(string path, string savePath, ref string errorinfo)
         {
-            path = path.Replace("\\", "/");
-            FileInfo fileInf = new FileInfo(filename);
-            //+ "/" + fileInf.Name
-            string uri = "ftp://" + ftpServerIP +'/'+path;
-            Connect(uri);//连接         
+            FileInfo fileInf = new FileInfo(path);
+            //string uri = "ftp://" + ftpServerIP +'/'+path;
+            Connect(savePath);//连接         
             // 默认为true，连接不会被关闭
             // 在一个命令之后被执行
             reqFTP.KeepAlive = false;
@@ -161,7 +159,7 @@ namespace FilesManager
             catch (Exception ex)
             {
                 errorinfo += string.Format("因{0},无法完成上传", ex.Message);
-                ErrorLogRecord(ex.Message, filename, path, "保存文件");
+                ErrorLogRecord(ex.Message, path, savePath, "保存文件");
                 return false;
             }
         }
@@ -181,8 +179,8 @@ namespace FilesManager
             path = path.Replace("\\", "/");
             FileInfo fileInf = new FileInfo(filename);
             //string uri = "ftp://" + path + "/" + fileInf.Name;
-            string uri = "ftp://" + path;
-            Connect(uri);//连接         
+            //string uri = "ftp://" + path;
+            Connect(path);//连接         
             // 默认为true，连接不会被关闭
             // 在一个命令之后被执行
             reqFTP.KeepAlive = false;
@@ -232,25 +230,14 @@ namespace FilesManager
         /// <param name="fileName"></param>
         /// <param name="errorinfo"></param>
         /// <returns></returns>
-        public bool Download(string ftpfilepath, string filePath, string fileName, ref string errorinfo)
+        public bool Download(string ftpfilepath, string filePath, ref string errorinfo)
         {
             try
             {
                 filePath = filePath.Replace("我的电脑\\", "");
-                string onlyFileName = Path.GetFileName(fileName);
-                if (!Directory.Exists(filePath))
-                {
-                    Directory.CreateDirectory(filePath);
-                }
-                string newFileName = filePath + "\\" + onlyFileName;
-                //if (File.Exists(newFileName))
-                //{
-                //    errorinfo = string.Format("本地文件{0}已存在,无法下载", newFileName);
-                //    return false;
-                //}
+                string savePath = Path.GetDirectoryName(filePath);
                 ftpfilepath = ftpfilepath.Replace("\\", "/");
-                string url = "ftp://" + ftpfilepath;
-                Connect(url);//连接 
+                Connect(ftpfilepath);//连接 
                 reqFTP.Credentials = new NetworkCredential(ftpUserID, ftpPassword);
                 FtpWebResponse response = (FtpWebResponse)reqFTP.GetResponse();
                 Stream ftpStream = response.GetResponseStream();
@@ -259,7 +246,7 @@ namespace FilesManager
                 int readCount;
                 byte[] buffer = new byte[bufferSize];
                 readCount = ftpStream.Read(buffer, 0, bufferSize);
-                FileStream outputStream = new FileStream(newFileName, FileMode.Create);
+                FileStream outputStream = new FileStream(filePath, FileMode.Create);
                 while (readCount > 0)
                 {
                     outputStream.Write(buffer, 0, readCount);
@@ -273,7 +260,7 @@ namespace FilesManager
             catch (Exception ex)
             {
                 errorinfo += string.Format("因{0},无法下载", ex.Message);
-                ErrorLogRecord(ex.Message, ftpfilepath, filePath + "\\" + fileName, "保存文件");
+                ErrorLogRecord(ex.Message, ftpfilepath, filePath, "保存文件");
                 return false;
             }
         }
@@ -325,8 +312,8 @@ namespace FilesManager
             try
             {
                 FileInfo fileInf = new FileInfo(fileName);
-                string uri = "ftp://" + ftpServerIP + "/" + fileInf.Name;
-                Connect(uri);//连接         
+                //string uri = "ftp://" + ftpServerIP + "/" + fileInf.Name;
+                Connect(fileName);//连接         
                 // 默认为true，连接不会被关闭
                 // 在一个命令之后被执行
                 reqFTP.KeepAlive = false;
@@ -350,8 +337,8 @@ namespace FilesManager
         {
             try
             {
-                string uri = "ftp://" + ftpServerIP + "/" + dirName;
-                Connect(uri);//连接      
+                //string uri = "ftp://" + ftpServerIP + "/" + dirName;
+                Connect(dirName);//连接      
                 reqFTP.Method = WebRequestMethods.Ftp.MakeDirectory;
                 FtpWebResponse response = (FtpWebResponse)reqFTP.GetResponse();
                 response.Close();
@@ -373,8 +360,8 @@ namespace FilesManager
         {
             try
             {
-                string uri = "ftp://" + ftpServerIP + "/" + dirName;
-                Connect(uri);//连接      
+                //string uri = "ftp://" + ftpServerIP + "/" + dirName;
+                Connect(dirName);//连接      
                 reqFTP.Method = WebRequestMethods.Ftp.RemoveDirectory;
                 FtpWebResponse response = (FtpWebResponse)reqFTP.GetResponse();
                 response.Close();
@@ -391,17 +378,12 @@ namespace FilesManager
         /// </summary>
         /// <param name="filename"></param>
         /// <returns></returns>
-        public long GetFileSize(string filename)
+        public long GetFileSize(string path)
         {
             long fileSize = 0;
-            filename = filename.Replace("\\", "/");
             try
             {
-                // FileInfo fileInf = new FileInfo(filename);
-                //string uri1 = "ftp://" + ftpServerIP + "/" + fileInf.Name;
-                // string uri = filename;
-                string uri = "ftp://" + filename;
-                Connect(uri);//连接      
+                Connect(path);//连接      
                 reqFTP.Method = WebRequestMethods.Ftp.GetFileSize;
                 FtpWebResponse response = (FtpWebResponse)reqFTP.GetResponse();
                 fileSize = response.ContentLength;
@@ -409,9 +391,28 @@ namespace FilesManager
             }
             catch (Exception ex)
             {
-                ErrorLogRecord(ex.Message, filename, filename, "获得文件大小");
+                //ErrorLogRecord(ex.Message, path, path, "获得文件大小");
+                fileSize = -1;
             }
             return fileSize;
+        }
+        #endregion
+        #region 获得ftp上文件修改时间
+        public DateTime GetFileUpdateTime(string path)
+        {
+            DateTime date = default;
+            try
+            {
+                Connect(path);
+                reqFTP.Method = WebRequestMethods.Ftp.GetDateTimestamp;
+                FtpWebResponse response = (FtpWebResponse)reqFTP.GetResponse();
+                date = response.LastModified;
+            }
+            catch (Exception ex)
+            {
+                //ErrorLogRecord(ex.Message, path, path, "获得文件大小");
+            }
+            return date;
         }
         #endregion
         #region ftp上文件改名
@@ -425,8 +426,8 @@ namespace FilesManager
             try
             {
                 FileInfo fileInf = new FileInfo(currentFilename);
-                string uri = "ftp://" + ftpServerIP + "/" + fileInf.Name;
-                Connect(uri);//连接
+                //string uri = "ftp://" + ftpServerIP + "/" + fileInf.Name;
+                Connect(currentFilename);//连接
                 reqFTP.Method = WebRequestMethods.Ftp.Rename;
                 reqFTP.RenameTo = newFilename;
                 FtpWebResponse response = (FtpWebResponse)reqFTP.GetResponse();
@@ -448,7 +449,7 @@ namespace FilesManager
         /// <returns></returns>
         public string[] GetFilesDetailList()
         {
-            return GetFileList("ftp://" + ftpServerIP + "/", WebRequestMethods.Ftp.ListDirectoryDetails);
+            return GetFileList(ftpServerIP, WebRequestMethods.Ftp.ListDirectoryDetails);
         }
         /// <summary>
         /// 获得目录明晰
@@ -458,7 +459,7 @@ namespace FilesManager
         public string[] GetFilesDetailList(string path)
         {
             //path = path.Replace("\\", "/");
-            return GetFileList("ftp://" + ftpServerIP + "/" + path, WebRequestMethods.Ftp.ListDirectoryDetails);
+            return GetFileList(path, WebRequestMethods.Ftp.ListDirectoryDetails);
         }
         #endregion
 

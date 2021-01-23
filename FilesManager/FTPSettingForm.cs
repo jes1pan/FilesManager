@@ -40,7 +40,7 @@ namespace FilesManager
             }
 
         }
-        private string ftpServerIp { get; set; }
+
         public FtpHelper FTPObj { get; set; }
         public string SelPath { get; set; }
         private bool hasCheckSel = true;
@@ -52,8 +52,9 @@ namespace FilesManager
                 tvMenu.Nodes.Clear();
                 if (!string.IsNullOrWhiteSpace(txtAddress.Text) && !string.IsNullOrWhiteSpace(txtUserName.Text) && !string.IsNullOrWhiteSpace(txtPassWord.Text))
                 {
+                    string ftpServerIp = txtAddress.Text.StartsWith("ftp://") ? txtAddress.Text.TrimEnd('/') : "ftp://" + txtAddress.Text.TrimEnd('/');
+                    txtAddress.Text = ftpServerIp;
                     FTPObj = new FtpHelper();
-                    ftpServerIp = txtAddress.Text.StartsWith("ftp://") ? txtAddress.Text.Substring(6).TrimEnd('/') : txtAddress.Text.TrimEnd('/');
                     FTPObj.FtpUpDown(ftpServerIp, txtUserName.Text, txtPassWord.Text);
                     var filesArr = FTPObj.GetFilesDetailList();
                     if (filesArr != null)
@@ -67,7 +68,7 @@ namespace FilesManager
                         }
                         List<TreeNode> treeNodes = new List<TreeNode>();
 
-                        BuildTreeNode(filesArr, treeNodes, "");
+                        BuildTreeNode(filesArr, treeNodes, ftpServerIp);
 
                         tvMenu.Nodes.AddRange(treeNodes.ToArray());
                     }
@@ -101,6 +102,7 @@ namespace FilesManager
             string fileName = strTemp.Substring(strTemp.IndexOf(' ')).Trim();
             return fileName;
         }
+
         private void IsSaveSetting()
         {
             if (address != txtAddress.Text)
@@ -115,13 +117,13 @@ namespace FilesManager
                 }
             }
         }
+
         private void btnEnter_Click(object sender, EventArgs e)
         {
-            string address = txtAddress.Text.StartsWith("ftp://") ? txtAddress.Text.Substring(txtAddress.Text.IndexOf('/') + 2) : txtAddress.Text;
             if (tvMenu.SelectedNode != null)
             {
                 IsSaveSetting();
-                SelPath = address + '/' + tvMenu.SelectedNode.Tag.ToString().TrimStart('/');
+                SelPath = tvMenu.SelectedNode.Tag.ToString();
                 this.DialogResult = DialogResult.OK;
                 this.Close();
             }
@@ -130,7 +132,7 @@ namespace FilesManager
                 if (!hasCheckSel)
                 {
                     IsSaveSetting();
-                    SelPath = address;
+                    SelPath = txtAddress.Text;
                     this.DialogResult = DialogResult.OK;
                     this.Close();
                 }
