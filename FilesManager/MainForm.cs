@@ -43,12 +43,6 @@ namespace FilesManager
         LinkedList<string> folderList;
         private void btnQuery_Click(object sender, EventArgs e)
         {
-            dataGridView1.DataSource = null;
-            lblLoading.Visible = true;
-            folderList = new LinkedList<string>();
-            lblCount.Visible = false;
-            lblSync.Visible = false;
-            lblPoint.Visible = false;
             //通过时间筛选
             //递归所有文件判断时间是否在这个区间
             if (string.IsNullOrEmpty(txtSelectFolder.Text))
@@ -61,6 +55,13 @@ namespace FilesManager
                 MessageBox.Show("请选择要保存的文件夹！");
                 return;
             }
+            lblCount.Visible = false;
+            lblSync.Visible = false;
+            lblPoint.Visible = false;
+            folderList = new LinkedList<string>();
+            dataGridView1.DataSource = null;
+            lblLoading.Visible = true;
+
             DataTable dt = new DataTable();
             dt.Columns.Add("OriginalPath", typeof(string));
             dt.Columns.Add("SavePath", typeof(string));
@@ -76,40 +77,24 @@ namespace FilesManager
                     //改变列顺序
                     dt.Columns.Add("CreateTime", typeof(string)).SetOrdinal(4);
                     #region 本地读取逻辑
-                    if (cbFtpSave.Checked)
-                    {
-                        ftpSave.ChangeServerIp(txtSaveFolder.Text);
-                    }
                     DirectoryInfo di = new DirectoryInfo(txtSelectFolder.Text.Trim());
 
                     DirectoryInfo[] dis = di.GetDirectories("*", SearchOption.AllDirectories);
                     var fls = di.GetFiles("*", SearchOption.AllDirectories);
 
                     string savePath = txtSaveFolder.Text.Replace("\\", "/") + "/";
+
                     foreach (var item in dis)
                     {
-                        int parentFolderIndex = item.FullName.IndexOf(di.Name);
-                        if (cbFtpSave.Checked)
-                        {
-                            folderList.AddLast(item.FullName.Substring(parentFolderIndex).Replace("\\", "/"));
-                        }
-                        else
-                        {
-                            folderList.AddLast(savePath+item.FullName.Substring(parentFolderIndex).Replace("\\", "/"));
-                        }
-
+                        folderList.AddLast(savePath + item.FullName.Substring(txtSelectFolder.Text.Length + 1).Replace("\\", "/"));
                     }
-                    if (cbFtpSave.Checked)
-                        folderList.AddFirst(di.Name);
+                    //folderList.AddFirst(savePath + di.Name);
+
                     foreach (var fl in fls)
                     {
                         DataRow dr = dt.NewRow();
                         dr["OriginalPath"] = fl.FullName;
-                        int parentFolderIndex = fl.FullName.ToString().IndexOf(di.Name);
-                        if (cbFtpSave.Checked)
-                            dr["SavePath"] =  fl.FullName.ToString().Substring(parentFolderIndex).Replace("\\", "/");
-                        else
-                            dr["SavePath"] = savePath + fl.FullName.ToString().Substring(parentFolderIndex).Replace("\\", "/");
+                        dr["SavePath"] = savePath + fl.FullName.ToString().Substring(txtSelectFolder.Text.Length + 1).Replace("\\", "/");
                         dr["FileName"] = fl.Name;
                         dr["CreateTime"] = fl.CreationTime;
                         dr["UpdateTime"] = fl.LastWriteTime;
@@ -123,14 +108,13 @@ namespace FilesManager
                     #region FTP
                     //ftpSel.ChangeServerIp(txtSelectFolder.Text);
                     //获取父目录
-                    string parentFolder = txtSelectFolder.Text.Substring(txtSelectFolder.Text.IndexOf('/') + 1);
+                    string parentFolder = txtSelectFolder.Text;
                     var filesArr = ftpSel.GetFilesDetailList(parentFolder);
-                    if (!cbFtpSave.Checked)
-                        if (txtSelectFolder.Text.IndexOf('/') != -1)
-                            folderList.AddFirst(txtSelectFolder.Text);
+                    //if (!cbFtpSave.Checked)
+                    //    if (txtSelectFolder.Text.IndexOf('/') != -1)
+                    //        folderList.AddFirst(txtSelectFolder.Text);
                     if (filesArr != null)
                     {
-                        DateTimeFormatInfo dtfi = new CultureInfo("en-US", false).DateTimeFormat;
                         for (int i = 0; i < filesArr.Length; i++)
                         {
                             BuildData(filesArr[i], dt, parentFolder);
@@ -190,10 +174,9 @@ namespace FilesManager
                 dataGridView1.Columns["UpdateTime"].DefaultCellStyle.Format = "yyyy/MM/dd HH:mm:ss";
             }
         }
+
         private void BuildData(string fileInfo, DataTable dt, string parentPath)
         {
-            //string fileName = fileInfo.Substring(fileInfo.LastIndexOf(' ')).Trim();
-            //string fileName = fileInfo.Substring(fileInfo.LastIndexOf("<DIR>") + 5).Trim();
             string fileName = FileNameFix(fileInfo);
             if (fileInfo.Contains("<DIR>"))
             {
@@ -206,21 +189,15 @@ namespace FilesManager
                         BuildData(filesArr[i], dt, parentPath);
                     }
                 }
-
-                folderList.AddFirst(parentPath.Substring(parentPath.IndexOf('/')).TrimStart('/'));
-
+                folderList.AddFirst(txtSaveFolder.Text + parentPath.Substring(txtSelectFolder.Text.Length));
             }
             else
             {
                 DateTime upTime = DateTime.Parse(fileInfo.Substring(0, 18), CultureInfo.GetCultureInfo("en-US").DateTimeFormat);
                 DataRow dr = dt.NewRow();
                 dr["OriginalPath"] = parentPath + "/" + fileName;
-                string savePath = parentPath.Substring(parentPath.IndexOf('/'));
-                //if (!cbFtpSave.Checked)
-                //{
-                //    savePath = savePath.Replace("/", "\\");
-                //}
-                dr["SavePath"] = savePath;
+                string savePath = txtSaveFolder.Text + parentPath.Substring(txtSelectFolder.Text.Length) + "/" + fileName;
+                dr["SavePath"] = savePath.Replace("\\", "/");
                 dr["FileName"] = fileName;
                 dr["UpdateTime"] = upTime;
                 dr["IsSync"] = false;
@@ -300,6 +277,7 @@ namespace FilesManager
                     {
                         lblSync.Visible = true;
                         lblPoint.Visible = true;
+                        lblPoint.Text = "0";
                     }));
 
                     GenerateFiles(dt, 0, ref errInfo);
@@ -329,36 +307,11 @@ namespace FilesManager
                     if (cbFtpSave.Checked)
                     {
                         //ftp需逐级创建文件夹
-                        var folderArr = fl.Split('/');
-                        var parentPath = folderArr[0];
-                        //一级目录单独逻辑
-                        if (folderArr.Length == 1)
+                        string parentPath = fl.Substring(0, fl.LastIndexOf('/'));
+                        string folderName = fl.Substring(fl.LastIndexOf('/') + 1);
+                        if (!ftpSave.GetFileList(parentPath).Contains(folderName))
                         {
-                            var filesArr = ftpSave.GetFileList();
-                            if (filesArr != null)
-                            {
-                                if (!filesArr.Contains(folderArr[0]))
-                                {
-                                    ftpSave.MakeDir(parentPath, ref errInfo);
-                                }
-                            }
-                        }
-
-                        for (int i = 1; i < folderArr.Length; i++)
-                        {
-                            var filesArr = ftpSave.GetFileList(parentPath);
-                            if (filesArr != null)
-                            {
-                                if (!ftpSave.GetFileList(parentPath).Contains(folderArr[i]))
-                                {
-                                    parentPath = parentPath + "/" + folderArr[i];
-                                    ftpSave.MakeDir(parentPath, ref errInfo);
-                                }
-                                else
-                                {
-                                    parentPath = parentPath + "/" + folderArr[i];
-                                }
-                            }
+                            ftpSave.MakeDir(fl, ref errInfo);
                         }
                     }
                     else
@@ -378,67 +331,76 @@ namespace FilesManager
         {
             for (int i = 0; i < dt.Rows.Count; i++)
             {
+                string savePath = dt.Rows[i]["SavePath"].ToString();
+                string filePath = dt.Rows[i]["OriginalPath"].ToString();
                 //FTP读取
-                if (cbFtpSel.Checked && !cbFtpSave.Checked)
+                if (cbFtpSel.Checked)
                 {
+                    long fileSize = ftpSel.GetFileSize(filePath);
+                    DateTime lastUpdTime = ftpSel.GetFileUpdateTime(filePath);
                     //FTP->FTP
-                    if (cbFtpSel.Checked)
+                    if (cbFtpSave.Checked)
                     {
-                        ftpSel.ChangeServerIp(dt.Rows[i]["OriginalPath"].ToString());
-                        ftpSave.ChangeServerIp(dt.Rows[i]["SavePath"].ToString() + "/" + dt.Rows[i]["FileName"].ToString());
+                        ftpSel.ChangeServerIp(filePath);
+                        ftpSave.ChangeServerIp(savePath);
+                        long saveSize = ftpSel.GetFileSize(savePath);
+                        if (saveSize != -1)
+                        {
+                            DateTime saveLastUpdTime = ftpSave.GetFileUpdateTime(savePath);
+                            if (saveSize == fileSize && saveLastUpdTime == lastUpdTime)
+                            {
+                                continue;
+                            }
+                        }
                         FtpHelper.Download(ftpSel, ftpSave, ref errInfo);
                     }
                     //FTP->本地
                     else
                     {
-                        ftpSel.Download(dt.Rows[i]["OriginalPath"].ToString(), dt.Rows[i]["SavePath"].ToString(),
-                       dt.Rows[i]["FileName"].ToString(), ref errInfo);
+                        if (File.Exists(savePath))
+                        {
+                            FileInfo fi = new FileInfo(savePath);
+                            if (fi.Length == fileSize && fi.LastWriteTime == lastUpdTime)
+                            {
+                                continue;
+                            }
+                            if (fi.Attributes == FileAttributes.ReadOnly)
+                                fi.Attributes = FileAttributes.Normal;
+                        }
+                        ftpSel.Download(filePath, savePath, ref errInfo);
                     }
-
                 }
                 //本地读取
                 else if (!cbFtpSel.Checked)
                 {
-                    FileInfo fi = new FileInfo(dt.Rows[i]["OriginalPath"].ToString());
+                    FileInfo fi = new FileInfo(filePath);
                     //只读文件无法操作会抛出异常
                     var fiAttributes = fi.Attributes;
                     if (fiAttributes == FileAttributes.ReadOnly)
                         fi.Attributes = FileAttributes.Normal;
+
                     //本地->FTP
                     if (cbFtpSave.Checked)
                     {
                         //获得父路径 提取列表  判断是否存在  截取文件名和大小
-                        string savePath = dt.Rows[i]["SavePath"].ToString();
-                        string parentPath = savePath.Substring(0, savePath.LastIndexOf('/'));
-                        var filesArr = ftpSave.GetFilesDetailList(parentPath);
-                        if (filesArr != null && filesArr.Length > 0)
+                        long saveSize = ftpSave.GetFileSize(savePath);
+                        if (saveSize != -1)//文件存在
                         {
-                            for (int j = 0; j < filesArr.Length; j++)
+                            DateTime lastUpdTime = ftpSave.GetFileUpdateTime(savePath);
+                            if (fi.Length == saveSize && fi.LastWriteTime == lastUpdTime)
                             {
-                                string fileName = FileNameFix(filesArr[j]);
-                                if (fileName == fi.Name && !filesArr[j].Contains("<DIR>")) //说明文件存在 比对修改时间和大小
-                                {
-                                    string lastUpdTime = DateTime.Parse(filesArr[j].Substring(0, 18), CultureInfo.GetCultureInfo("en-US").DateTimeFormat).ToString();
-                                    //秒清空  FTP只返回到分 毫秒会影响 所以string
-                                    string filesTime = fi.LastWriteTime.Subtract(TimeSpan.FromSeconds(fi.LastWriteTime.Second)).ToString();
-                                    long size = FileSizeFix(filesArr[j], fileName);
-
-                                    if (lastUpdTime == filesTime && size == fi.Length)
-                                    {
-                                        fi.Attributes = fiAttributes;
-                                        continue;
-                                    }
-                                }
+                                fi.Attributes = fiAttributes;
+                                continue;
                             }
                         }
-                        ftpSave.Upload(dt.Rows[i]["OriginalPath"].ToString(), dt.Rows[i]["SavePath"].ToString(), ref errInfo);
+                        ftpSave.Upload(filePath, savePath, ref errInfo);
                     }
                     //本地->本地
                     else
                     {
-                        if (File.Exists(dt.Rows[i]["SavePath"].ToString()))
+                        if (File.Exists(savePath))
                         {
-                            FileInfo newFi = new FileInfo(dt.Rows[i]["SavePath"].ToString());
+                            FileInfo newFi = new FileInfo(savePath);
                             //文件修改日期和大小相同  跳过 复原权限
                             if (newFi.Length == fi.Length && newFi.LastWriteTime == fi.LastWriteTime)
                             {
@@ -446,12 +408,12 @@ namespace FilesManager
                                 continue;
                             }
                         }
-                        File.Copy(dt.Rows[i]["OriginalPath"].ToString(), dt.Rows[i]["SavePath"].ToString(), true);
+                        File.Copy(filePath, savePath, true);
                     }
                     //还原文件权限
                     fi.Attributes = fiAttributes;
                 }
-                if (errInfo != string.Empty)
+                if (errInfo == string.Empty)
                 {
                     ++count;
                     lblPoint.Invoke(new Action(delegate
@@ -462,13 +424,6 @@ namespace FilesManager
                     }));
                 }
             }
-        }
-
-        private long FileSizeFix(string str, string fileName)
-        {
-            string temp = str.Substring(18);
-            string size = temp.Substring(0, temp.Length - fileName.Length - 1).Trim();
-            return Convert.ToInt64(size);
         }
 
         private void btnClear_Click(object sender, EventArgs e)
