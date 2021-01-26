@@ -79,8 +79,8 @@ namespace FilesManager
                     #region 本地读取逻辑
                     DirectoryInfo di = new DirectoryInfo(txtSelectFolder.Text.Trim());
 
-                    DirectoryInfo[] dis = di.GetDirectories("*", SearchOption.AllDirectories);
-                    var fls = di.GetFiles("*", SearchOption.AllDirectories);
+                DirectoryInfo[] dis = di.GetDirectories("*", SearchOption.AllDirectories);
+                var fls = di.GetFiles("*", SearchOption.AllDirectories);
 
                     string savePath = txtSaveFolder.Text.Replace("\\", "/") + "/";
 
