@@ -79,8 +79,8 @@ namespace FilesManager
                     #region 本地读取逻辑
                     DirectoryInfo di = new DirectoryInfo(txtSelectFolder.Text.Trim());
 
-                DirectoryInfo[] dis = di.GetDirectories("*", SearchOption.AllDirectories);
-                var fls = di.GetFiles("*", SearchOption.AllDirectories);
+                    DirectoryInfo[] dis = di.GetDirectories("*", SearchOption.AllDirectories);
+                    var fls = di.GetFiles("*", SearchOption.AllDirectories);
 
                     string savePath = txtSaveFolder.Text.Replace("\\", "/") + "/";
 
@@ -133,24 +133,22 @@ namespace FilesManager
             string where = string.Empty;
             if (dtpStart.Value != DateTime.Parse("2021-1-1"))
             {
-                where += "AND UpdateTime >= '" + dtpStart.Value + "'";
+                where += " AND UpdateTime >= #" + dtpStart.Value + "#";
             }
             if (dtpEnd.Value != DateTime.Parse("2021-1-1"))
             {
-                where += "AND UpdateTime <= '" + dtpEnd.Value + "'";
+                where += " AND UpdateTime <= #" + dtpEnd.Value + "#";
             }
             if (where != string.Empty)
             {
                 var rows = dt.Select("1=1" + where);
-                if (rows.Length > 0)
+                DataTable dts = dt.Clone();
+                foreach (var item in rows)
                 {
-                    DataTable dts = dt.Clone();
-                    foreach (var item in rows)
-                    {
-                        dts.Rows.Add(item.ItemArray);
-                    }
-                    dt = dts;
+                    dts.Rows.Add(item.ItemArray);
                 }
+                dt = dts;
+
             }
 
             if (dt.Rows.Count > 0)
@@ -171,7 +169,6 @@ namespace FilesManager
                     dataGridView1.Columns[i].Width = width;
 
                 }
-                dataGridView1.Columns["UpdateTime"].DefaultCellStyle.Format = "yyyy/MM/dd HH:mm:ss";
             }
         }
 
