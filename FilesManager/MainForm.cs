@@ -18,7 +18,7 @@ namespace FilesManager
         public MainForm()
         {
             InitializeComponent();
-            string sysPath = System.Environment.CurrentDirectory + "\\Logs";
+            string sysPath = System.AppDomain.CurrentDomain.BaseDirectory + "\\Logs";
             if (!Directory.Exists(sysPath))
             {
                 Directory.CreateDirectory(sysPath);
@@ -71,7 +71,6 @@ namespace FilesManager
 
             Task.Factory.StartNew(() =>
             {
-
                 if (!cbFtpSel.Checked)
                 {
                     //改变列顺序
@@ -88,10 +87,10 @@ namespace FilesManager
                     {
                         folderList.AddLast(savePath + item.FullName.Substring(txtSelectFolder.Text.Length + 1).Replace("\\", "/"));
                     }
-                    //folderList.AddFirst(savePath + di.Name);
 
                     foreach (var fl in fls)
                     {
+                        fl.Refresh();
                         DataRow dr = dt.NewRow();
                         dr["OriginalPath"] = fl.FullName;
                         dr["SavePath"] = savePath + fl.FullName.ToString().Substring(txtSelectFolder.Text.Length + 1).Replace("\\", "/");
@@ -133,11 +132,11 @@ namespace FilesManager
             string where = string.Empty;
             if (dtpStart.Value != DateTime.Parse("2021-1-1"))
             {
-                where += " AND UpdateTime >= #" + dtpStart.Value + "#";
+                where += " AND UpdateTime >= '" + dtpStart.Value + "'";
             }
             if (dtpEnd.Value != DateTime.Parse("2021-1-1"))
             {
-                where += " AND UpdateTime <= #" + dtpEnd.Value + "#";
+                where += " AND UpdateTime <= '" + dtpEnd.Value + "'";
             }
             if (where != string.Empty)
             {
@@ -155,8 +154,6 @@ namespace FilesManager
             {
                 lblCount.Visible = true;
                 lblCount.Text = "合计：" + dt.Rows.Count;
-                //progressBar1.Maximum = dt.Rows.Count;
-
                 dataGridView1.DataSource = dt;
                 //调整宽度
                 for (int i = 0; i < dt.Columns.Count; i++)
@@ -282,7 +279,7 @@ namespace FilesManager
                     if (errInfo != string.Empty)
                     {
                         MessageBox.Show("部分保存成功，请查看日志", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        System.Diagnostics.Process.Start(System.Environment.CurrentDirectory + "\\Logs");
+                        System.Diagnostics.Process.Start(System.AppDomain.CurrentDomain.BaseDirectory + "\\Logs");
                     }
                     else
                     {

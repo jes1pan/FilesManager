@@ -466,7 +466,7 @@ namespace FilesManager
 
         private void ErrorLogRecord(string msg, string originalPath, string savePath, string remark)
         {
-            string sysPath = System.Environment.CurrentDirectory + "\\Logs";
+            string sysPath = System.AppDomain.CurrentDomain.BaseDirectory + "\\Logs";
             using (StreamWriter sw = new StreamWriter(File.OpenWrite(sysPath + "\\" + DateTime.Now.ToString("yyyyMMdd") + "log.html")))
             {
                 sw.BaseStream.Seek(-8, SeekOrigin.End);

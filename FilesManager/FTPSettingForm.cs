@@ -20,7 +20,7 @@ namespace FilesManager
             InitializeComponent();
             txtPassWord.KeyPress += TxtPassWord_KeyPress;
 
-            string sysPath = System.Environment.CurrentDirectory + "\\setting.txt";
+            string sysPath = System.AppDomain.CurrentDomain.BaseDirectory + "\\setting.txt";
             if (File.Exists(sysPath))
             {
                 using (StreamReader sr = new StreamReader(sysPath))
@@ -109,7 +109,7 @@ namespace FilesManager
             {
                 if (MessageBox.Show("是否保存配置？", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.Information) == System.Windows.Forms.DialogResult.Yes)
                 {
-                    string sysPath = System.Environment.CurrentDirectory + "\\setting.txt";
+                    string sysPath = System.AppDomain.CurrentDomain.BaseDirectory + "\\setting.txt";
                     using (StreamWriter sw = new StreamWriter(sysPath, false))
                     {
                         sw.Write(txtAddress.Text + '#' + txtUserName.Text + '#' + txtPassWord.Text);
