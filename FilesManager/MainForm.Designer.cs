@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.lblPoint = new System.Windows.Forms.Label();
             this.lblSync = new System.Windows.Forms.Label();
@@ -147,9 +147,9 @@
             // 
             this.btnClear.BackColor = System.Drawing.SystemColors.Control;
             this.btnClear.FlatAppearance.BorderSize = 0;
-            this.btnClear.Location = new System.Drawing.Point(669, 56);
+            this.btnClear.Location = new System.Drawing.Point(669, 54);
             this.btnClear.Name = "btnClear";
-            this.btnClear.Size = new System.Drawing.Size(98, 31);
+            this.btnClear.Size = new System.Drawing.Size(98, 29);
             this.btnClear.TabIndex = 14;
             this.btnClear.Text = "清空";
             this.btnClear.UseVisualStyleBackColor = false;
@@ -158,9 +158,9 @@
             // btnSave
             // 
             this.btnSave.BackColor = System.Drawing.SystemColors.Control;
-            this.btnSave.Location = new System.Drawing.Point(893, 56);
+            this.btnSave.Location = new System.Drawing.Point(893, 54);
             this.btnSave.Name = "btnSave";
-            this.btnSave.Size = new System.Drawing.Size(98, 31);
+            this.btnSave.Size = new System.Drawing.Size(98, 29);
             this.btnSave.TabIndex = 13;
             this.btnSave.Text = "保存";
             this.btnSave.UseVisualStyleBackColor = false;
@@ -169,9 +169,9 @@
             // btnQuery
             // 
             this.btnQuery.BackColor = System.Drawing.SystemColors.Control;
-            this.btnQuery.Location = new System.Drawing.Point(781, 56);
+            this.btnQuery.Location = new System.Drawing.Point(781, 54);
             this.btnQuery.Name = "btnQuery";
-            this.btnQuery.Size = new System.Drawing.Size(98, 31);
+            this.btnQuery.Size = new System.Drawing.Size(98, 29);
             this.btnQuery.TabIndex = 12;
             this.btnQuery.Text = "搜索";
             this.btnQuery.UseVisualStyleBackColor = false;
@@ -180,7 +180,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(379, 60);
+            this.label2.Location = new System.Drawing.Point(391, 62);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(25, 20);
             this.label2.TabIndex = 11;
@@ -190,9 +190,9 @@
             // 
             this.dtpEnd.CustomFormat = " ";
             this.dtpEnd.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.dtpEnd.Location = new System.Drawing.Point(413, 58);
+            this.dtpEnd.Location = new System.Drawing.Point(419, 58);
             this.dtpEnd.Name = "dtpEnd";
-            this.dtpEnd.Size = new System.Drawing.Size(238, 27);
+            this.dtpEnd.Size = new System.Drawing.Size(244, 27);
             this.dtpEnd.TabIndex = 10;
             this.dtpEnd.Tag = "";
             this.dtpEnd.Value = new System.DateTime(2021, 1, 1, 0, 0, 0, 0);
@@ -201,7 +201,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(32, 66);
+            this.label1.Location = new System.Drawing.Point(69, 65);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(69, 20);
             this.label1.TabIndex = 9;
@@ -212,9 +212,9 @@
             this.dtpStart.CustomFormat = " ";
             this.dtpStart.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
             this.dtpStart.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.dtpStart.Location = new System.Drawing.Point(135, 58);
+            this.dtpStart.Location = new System.Drawing.Point(144, 58);
             this.dtpStart.Name = "dtpStart";
-            this.dtpStart.Size = new System.Drawing.Size(238, 27);
+            this.dtpStart.Size = new System.Drawing.Size(244, 27);
             this.dtpStart.TabIndex = 8;
             this.dtpStart.Value = new System.DateTime(2021, 1, 1, 0, 0, 0, 0);
             this.dtpStart.ValueChanged += new System.EventHandler(this.dtp_ValueChanged);
@@ -276,14 +276,14 @@
             this.dataGridView1.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.dataGridView1.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.Sunken;
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.Color.MediumSeaGreen;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.ControlLightLight;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dataGridView1.DefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle5.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle5.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            dataGridViewCellStyle5.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.Color.MediumSeaGreen;
+            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.ControlLightLight;
+            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dataGridView1.DefaultCellStyle = dataGridViewCellStyle5;
             this.dataGridView1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridView1.GridColor = System.Drawing.SystemColors.Menu;
             this.dataGridView1.Location = new System.Drawing.Point(0, 0);
