@@ -78,7 +78,7 @@ namespace FilesManager
                     #region 本地读取逻辑
                     DirectoryInfo di = new DirectoryInfo(txtSelectFolder.Text.Trim());
 
-                    DirectoryInfo[] dis = di.GetDirectories("*", SearchOption.AllDirectories);
+                    var dis = di.GetDirectories("*", SearchOption.AllDirectories);
                     var fls = di.GetFiles("*", SearchOption.AllDirectories);
 
                     string savePath = txtSaveFolder.Text.Replace("\\", "/") + "/";
@@ -95,8 +95,8 @@ namespace FilesManager
                         dr["OriginalPath"] = fl.FullName;
                         dr["SavePath"] = savePath + fl.FullName.ToString().Substring(txtSelectFolder.Text.Length + 1).Replace("\\", "/");
                         dr["FileName"] = fl.Name;
-                        dr["CreateTime"] = fl.CreationTime;
-                        dr["UpdateTime"] = fl.LastWriteTime;
+                        dr["CreateTime"] = fl.CreationTime.ToString("yyyy-MM-dd HH:mm:ss");
+                        dr["UpdateTime"] = fl.LastWriteTime.ToString("yyyy-MM-dd HH:mm:ss");
                         dr["IsSync"] = false;
                         dt.Rows.Add(dr);
                     }
@@ -132,11 +132,11 @@ namespace FilesManager
             string where = string.Empty;
             if (dtpStart.Value != DateTime.Parse("2021-1-1"))
             {
-                where += " AND UpdateTime >= '" + dtpStart.Value + "'";
+                where += " AND UpdateTime >= #" + dtpStart.Value.ToString("yyyy-MM-dd HH:mm:ss") + "#";
             }
             if (dtpEnd.Value != DateTime.Parse("2021-1-1"))
             {
-                where += " AND UpdateTime <= '" + dtpEnd.Value + "'";
+                where += " AND UpdateTime <= #" + dtpEnd.Value.ToString("yyyy-MM-dd HH:mm:ss") + "#";
             }
             if (where != string.Empty)
             {
