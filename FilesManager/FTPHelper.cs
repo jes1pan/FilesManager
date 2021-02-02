@@ -70,6 +70,7 @@ namespace FilesManager
             {
                 Connect(path);
                 reqFTP.Method = WRMethods;
+                //reqFTP.UsePassive = false;
                 WebResponse response = reqFTP.GetResponse();
                 StreamReader reader = new StreamReader(response.GetResponseStream(), System.Text.Encoding.UTF8);//中文文件名
                 string line = reader.ReadLine();
