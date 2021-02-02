@@ -295,14 +295,26 @@ namespace FilesManager
         {
             if (folderList != null)
             {
+                string parentPath = string.Empty;
+                string[] tempArr = null;
                 foreach (var fl in folderList)
                 {
                     if (cbFtpSave.Checked)
                     {
                         //ftp需逐级创建文件夹
-                        string parentPath = fl.Substring(0, fl.LastIndexOf('/'));
+                        string savePath = fl.Substring(0, fl.LastIndexOf('/'));
+                        if (!parentPath.Equals(savePath))
+                        {
+                            parentPath = savePath;
+                            tempArr = ftpSave.GetFileList(parentPath);
+                            if (tempArr is null)
+                            {
+                                tempArr = ftpSave.GetFileList(parentPath);
+                            }
+                        }
+
                         string folderName = fl.Substring(fl.LastIndexOf('/') + 1);
-                        if (!ftpSave.GetFileList(parentPath).Contains(folderName))
+                        if (!tempArr.Contains(folderName))
                         {
                             ftpSave.MakeDir(fl, ref errInfo);
                         }

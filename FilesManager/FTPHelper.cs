@@ -27,7 +27,6 @@ namespace FilesManager
         /// <param name="path"></param>
         private void Connect(string path)//连接ftp
         {
-            //string parsePath = path.StartsWith("ftp://") ? path : "ftp://" + path;
             // 根据uri创建FtpWebRequest对象
             reqFTP = (FtpWebRequest)FtpWebRequest.Create(new Uri(path));
             // 指定数据传输类型
@@ -70,6 +69,7 @@ namespace FilesManager
             {
                 Connect(path);
                 reqFTP.Method = WRMethods;
+                //reqFTP.UsePassive = false;
                 WebResponse response = reqFTP.GetResponse();
                 StreamReader reader = new StreamReader(response.GetResponseStream(), System.Text.Encoding.UTF8);//中文文件名
                 string line = reader.ReadLine();
